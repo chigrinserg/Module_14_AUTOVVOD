@@ -1,0 +1,30 @@
+#pragma once
+#include <iostream>
+#include <string>
+
+class TrieNode
+{
+public:
+    TrieNode* children[35];
+    bool end_of_word;
+    unsigned char letter;
+    TrieNode();
+};
+class Trie
+{
+public:
+    std::string prefix;
+    TrieNode root;
+    void Insert(std::string str); //Вставка слова в дерево
+    void insertFromFile_rus();
+    TrieNode* Search_rus(std::string str);
+    void PrintLexical_rus(TrieNode* current, std::string prefix, std::string suffix);
+    void extract_rus();
+    bool res_extract_rus();
+    int count_pref_suff_rus();
+    std::string print_suff_rus();
+    void print_pref_suff_rus();
+    void console_rus();
+    void mass(std::string word);
+    void mass_cons();
+};
