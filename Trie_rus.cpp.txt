@@ -1,0 +1,235 @@
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <fstream>
+#include <Windows.h>
+#include "Trie.h"
+
+TrieNode::TrieNode()
+{
+    end_of_word = false;
+    for (int i = 0; i < 35; i++)
+    {
+        children[i] = NULL;
+    }
+    letter = '\0';
+}
+
+TrieNode root;
+
+void Trie::Insert(std::string str) //функция вставки слов в дерево
+{
+    TrieNode* current = &root;
+    for (size_t i = 0; i < str.size(); i++)
+    {
+        if (static_cast<unsigned char>(str[i]) >= 224 && static_cast<unsigned char>(str[i]) <= 255)
+        {
+            if (current->children[str.at(i) - 'а']/*рус*/ == nullptr)
+            {
+                current->children[str.at(i) - 'а'/*рус*/] = new TrieNode;
+                current->children[str.at(i) - 'а'/*рус*/]->letter = str.at(i);
+            }
+            current = current->children[str.at(i) - 'а'/*рус*/];
+        }
+    }
+    current->end_of_word = true;
+}
+
+void Trie::insertFromFile_rus() //функция загрузки слов в дерево из текстового файла русского словаря
+{
+    std::string line;
+    std::ifstream in_rus("Words.txt"); // окрываем файл для чтения
+    if (in_rus.is_open())
+    {
+        while (std::getline(in_rus, line))
+        {
+            Insert(line);
+        }
+    }
+    in_rus.close(); // закрываем файл
+}
+
+TrieNode* Trie::Search_rus(std::string str) // функция поиска слов в дереве - русский язык
+{
+    TrieNode* current = &root;
+    for (size_t i = 0; i < str.size(); i++)
+    {
+        if (current->children[str.at(i) - 'а']/*рус*/)
+        {
+            current = current->children[str.at(i) - 'а'/*рус*/];
+        }
+        else
+        {
+            current = nullptr;
+            break;
+        }
+    }
+    return current;
+}
+
+int width = 1;
+std::vector<std::string>extr_p_s(width); //массив слов
+int _size = 1;
+std::vector<std::string>extr(_size); //массив суффиксов
+
+void Trie::PrintLexical_rus(TrieNode* current, std::string prefix, std::string suffix)
+/*Формирование результатов поиска - выгрузка слов в массив <extr_p_s> и выгрузка суффиксов
+в массив суффиксов <extr>*/
+{
+    if (current->end_of_word and suffix.size() != 0)
+    {
+        for (int n = 0; n < width; ++n)
+        {
+            extr_p_s.push_back(prefix + suffix);
+        }
+
+        for (int i = 0; i < _size; ++i)
+        {
+            extr.push_back(suffix);
+        }
+    }
+    for (int i = 0; i < 35; i++)
+    {
+        std::string temp = suffix;
+        if (current->children[i])
+        {
+            temp += current->children[i]->letter;
+            PrintLexical_rus(current->children[i], prefix, temp);
+        }
+    }
+}
+
+void Trie::extract_rus() //Функция проверки наличия слов в дереве
+{
+    TrieNode* current = Search_rus(prefix);
+    if (current == NULL or current == &root)
+    {
+        std::cout << "Слова с таким префиксом в словаре отсутствуют" << '\n';
+    }
+    else
+    {
+        bool haschildren = false;
+        for (int c = 0; c < 35; c++)
+        {
+            if (current->children[c] != NULL)
+            {
+                haschildren = true; break;
+            }
+        }
+        if (haschildren == false)
+        {
+            std::cout << "Слова с таким префиксом в словаре отсутствуют" << '\n';
+        }
+        else
+        {
+            PrintLexical_rus(current, prefix, "");
+        }
+    }
+}
+
+bool Trie::res_extract_rus() /*функция извлечения нулевого результата поиска для возврата 
+                             к повторному вводу префикса - русский язык*/
+{
+    TrieNode* current = Search_rus(prefix);
+    if (current == NULL or current == &root)
+    {
+        return false;
+    }
+    else
+    {
+        bool haschildren = false;
+        for (int c = 0; c < 35; c++)
+        {
+            if (current->children[c] != NULL)
+            {
+                haschildren = true;
+                return true;
+                break;
+            }
+        }
+        if (haschildren == false)
+        {
+            return false;
+        }
+    }
+}
+
+int Trie::count_pref_suff_rus() //подсчет числа выведенных слов
+{
+    int count_extr_p_s = 1;//переменная числа элементов массива слов
+    for (int n = 0; n < std::end(extr) - std::begin(extr); ++n)
+    {
+        ++count_extr_p_s;
+    }
+    return count_extr_p_s;
+}
+
+void Trie::print_pref_suff_rus() /*Вывод набора слов из массива в консоль. Нумерация слов начинается
+                                 с нуля. В некоторых случаях нулевой номер может оказаться пустым. В 
+                                 этом случае при введении в консоли нуля выведется только введенный 
+                                 префикс.*/
+{
+    std::cout << '\n';
+    for (int n = 0; n < std::end(extr) - std::begin(extr); ++n)
+    {
+        std::cout << n << ". " << extr_p_s[n] << '\n';
+    }
+}
+
+std::string Trie::print_suff_rus() /*Выбор по индексу нужного суффикса из массива суффиксов. 
+                                   Вводится значение индекса, равное номеру выбранного слова в списке*/
+{
+    for (int i = 0; i < std::end(extr) - std::begin(extr); ++i)
+    {
+        std::cout << "Введите номер слова из списка: ";
+        std::cin >> i;
+        return extr[i];
+    }
+}
+
+void Trie::console_rus() //вывод результатов в консоль
+{
+    std::string word;  //переменная итогового слова, построенного из префикса и выбранного суффикса
+    std::string pref_word; //переменная введенного префикса слова
+   
+    tryAgain:
+    std::cout << "Введите префикс: ";
+    _absofres:
+    newprefix:
+    std::cin >> prefix;
+    if (prefix >= "0" && prefix <= "9") //контроль ошибочного ввода цифр в строку префикса
+    {
+        std::cout << "Некорректный символ!" << '\n';
+        std::cin.clear(); 
+        std::cin.ignore(100, '\n');
+        goto tryAgain; //по поводу оператора goto см. комментарий в блоке Main
+    }
+    bool abs_of_res_rus = res_extract_rus(); //Переменная наличия либо отсутствия префикса в словаре. Русский язык
+    for (int i = 0; i < prefix.size(); ++i)
+    {
+        extract_rus();
+        if (abs_of_res_rus == 0)
+        {
+            std::cout << "Введите другой префикс: ";
+            goto _absofres;
+        }
+        break;
+    }
+    pref_word = prefix;
+    int long_prefix = count_pref_suff_rus(); //переменная длины префикса
+    if (long_prefix > 25)
+    {
+        std::cout << "Список слов слишком велик. Введите более длинный префикс! " << '\n';
+        extr_p_s.clear(); //очистка массива выгрузки результатов
+        extr.clear(); //очистка массива суффиксов
+        goto newprefix;
+    }
+    print_pref_suff_rus();
+    word = pref_word + print_suff_rus();
+    std::cout << '\n';
+    system("cls");
+    std::cout << word << '\n';
+    extr_p_s.clear(); //очистка массива выгрузки результатов
+    extr.clear(); //очистка массива суффиксов
+}

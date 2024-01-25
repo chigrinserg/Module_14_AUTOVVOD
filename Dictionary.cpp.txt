@@ -1,0 +1,90 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <fstream>
+#include <vector>
+#include <Windows.h>
+#include "Dictionary.h"
+
+Dictionary::Dictionary() {} //конструктор по умолчанию
+Dictionary::Dictionary(std::string& word) : m_word{ word } {} //конструктор класса
+Dictionary::~Dictionary() {}
+
+std::ostream& operator<< (std::ostream& out, const Dictionary& d) //перегруженный оператор вывода
+{
+    out << d.m_word;
+    return out;
+}
+std::istream& operator>> (std::istream& in, Dictionary& d) //перегруженный оператор ввода
+{
+    in >> d.m_word;
+    return in;
+}
+
+void Dictionary::setWords() //функция записи слов
+{
+    std::getline(std::cin >> std::ws, m_word);
+}
+void Dictionary::getWords() //функция получения слов
+{
+    std::cout << m_word;
+}
+
+int size{ 1 };
+std::vector<Dictionary> array(size);    //массив для размещения вводимых слов
+std::vector<std::string> words;
+Dictionary d;                      //экземпляр класса
+
+void Dictionary::FillArray() //функция ввода слов с клавиатуры
+{
+    bool rep{ true };
+    while (true)
+    {
+        std::cout << "Укажите количество слов: ";
+        std::cin >> size;
+        std::cout << "Впишите слова в словарь:" << '\n';
+        for (int j = 0; j < size; ++j)
+        {
+            d.setWords();
+            array.push_back(d);
+        }
+        std::cout << "Вы вписали слова: ";
+        for (int i = 0; i < (std::end(array) - std::begin(array)); ++i) //выводим созданный массив на консоль
+        {
+            std::cout << array[i] << '\n';
+        }
+        std::ofstream out("Words.txt", std::ios::app); //сохраняем массив в текстовый файл
+        for (int i = 0; i < (std::end(array) - std::begin(array)); ++i)
+        {
+            out << array[i] << std::endl;
+        }
+        int z{};
+        std::cout << '\n';
+        std::cout << "Продолжить запись? Да - нажмите '1', нет - нажмите '0'" << '\n';
+        std::cin >> z;
+        if (z == 1)
+        {
+            rep = true;
+        }
+        else
+        {
+            rep = false;
+            break;
+        }
+        system("cls");
+    }
+}
+
+void Dictionary::DeleteEmptyLines() //Удаление пустых строк из файла словаря
+{
+    std::ifstream in("Words.txt");
+    std::string line, text;
+    while (std::getline(in, line))
+        if (!(line.empty() || line.find_first_not_of(' ') == std::string::npos))
+        {
+            text += line + "\n";
+        }
+    in.close();
+    std::ofstream out("Words.txt");
+    out << text;
+}
