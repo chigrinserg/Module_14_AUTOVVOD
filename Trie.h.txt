@@ -16,15 +16,17 @@ public:
     std::string prefix;
     TrieNode root;
     void Insert(std::string str); //Вставка слова в дерево
-    void insertFromFile_rus();
-    TrieNode* Search_rus(std::string str);
-    void PrintLexical_rus(TrieNode* current, std::string prefix, std::string suffix);
-    void extract_rus();
-    bool res_extract_rus();
-    int count_pref_suff_rus();
-    std::string print_suff_rus();
-    void print_pref_suff_rus();
-    void console_rus();
-    void mass(std::string word);
-    void mass_cons();
+    void insertFromFile_rus(); //функция загрузки слов в дерево из текстового файла русского словаря
+    TrieNode* Search_rus(std::string str); // функция поиска слов в дереве - русский язык
+    void PrintLexical_rus(TrieNode* current, std::string prefix, std::string suffix); /*Формирование результатов поиска - выгрузка слов в                                                                                             массив <extr_p_s> и выгрузка суффиксов в массив суффиксов                                                                                       extr>*/
+    void extract_rus(); //Функция проверки наличия слов в дереве
+    bool res_extract_rus();  /*функция извлечения нулевого результата поиска для возврата 
+                             к повторному вводу префикса - русский язык*/
+    int count_pref_suff_rus(); //подсчет числа выведенных слов
+    std::string print_suff_rus(); /*Выбор по индексу нужного суффикса из массива суффиксов. 
+                                   Вводится значение индекса, равное номеру выбранного слова в списке*/
+    void print_pref_suff_rus();  /*Вывод набора слов из массива в консоль. Нумерация слов начинается
+                                 с нуля.*/
+    void console_rus(); //вывод результатов в консоль
+    
 };
